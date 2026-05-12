@@ -2,12 +2,22 @@ import os
 import cv2
 import numpy as np
 import joblib
+import argparse
 from sklearn.metrics import accuracy_score, classification_report
 
 def main():
-    # 1. 設定模型與資料集路徑
-    model_path = 'rps_svm_model.pkl'
-    # 假設 demo 資料夾與 dataset 資料夾在同一個主目錄下
+    parser = argparse.ArgumentParser(description="Test RPS Models")
+    parser.add_argument('--model', type=str, default='svm', choices=['svm', 'mobilenet', 'efficientnet'], help="Model to test (svm, mobilenet, efficientnet)")
+    args = parser.parse_args()
+
+    model_type = args.model
+    if model_type == 'svm':
+        model_path = 'rps_svm_model.pkl'
+    elif model_type == 'mobilenet':
+        model_path = 'rps_mobilenet_model.h5'
+    else:
+        model_path = 'rps_efficientnet_model.h5'
+        
     test_dir = '../dataset/test' 
 
     if not os.path.exists(model_path):
@@ -19,15 +29,19 @@ def main():
         print("請確認 dataset/test 資料夾是否存在於上一層目錄。")
         return
 
-    # 2. 載入模型
-    print("⏳ 載入模型中...")
-    clf = joblib.load(model_path)
+    # 載入模型
+    print(f"⏳ 載入 {model_type.upper()} 模型中...")
+    if model_type == 'svm':
+        clf = joblib.load(model_path)
+    else:
+        import tensorflow as tf
+        clf = tf.keras.models.load_model(model_path)
     print("✅ 模型載入成功！\n")
 
     label_map = {'rock': 0, 'paper': 1, 'scissors': 2}
     X_test, y_test = [], []
 
-    # 3. 讀取並處理測試圖片
+    # 讀取並處理測試圖片
     print("📂 正在讀取測試集圖片並進行預測...")
     for category, label_idx in label_map.items():
         category_path = os.path.join(test_dir, category)
@@ -48,25 +62,40 @@ def main():
                 img = cv2.imread(img_path)
                 
                 if img is not None:
-                    # 資料前處理 (必須與訓練時一致)
-                    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                    resized = cv2.resize(gray, (64, 64))
-                    X_test.append(resized.flatten())
+                    # 資料前處理
+                    if model_type == 'svm':
+                        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                        resized = cv2.resize(gray, (64, 64))
+                        X_test.append(resized.flatten())
+                    else:
+                        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                        resized = cv2.resize(img_rgb, (224, 224))
+                        X_test.append(resized)
                     y_test.append(label_idx)
 
     if not X_test:
         print("❌ 錯誤：沒有讀取到任何圖片，請檢查資料夾結構。")
         return
 
-    # 正規化
-    X_test = np.array(X_test) / 255.0
-    y_test = np.array(y_test)
+    # 正規化與預測
+    if model_type == 'svm':
+        X_test = np.array(X_test) / 255.0
+        y_test = np.array(y_test)
+        y_pred = clf.predict(X_test)
+    else:
+        X_test = np.array(X_test).astype(np.float32)
+        if model_type == 'mobilenet':
+            X_test = tf.keras.applications.mobilenet_v2.preprocess_input(X_test)
+        else:
+            X_test = tf.keras.applications.efficientnet.preprocess_input(X_test)
+        
+        y_test = np.array(y_test)
+        y_pred_probs = clf.predict(X_test)
+        y_pred = np.argmax(y_pred_probs, axis=1)
 
-    # 4. 進行預測與評估
-    y_pred = clf.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     
-    print(f"\n📊 測試結果統整:")
+    print(f"\n📊 {model_type.upper()} 測試結果統整:")
     print(f"總共測試了 {len(y_test)} 張圖片")
     print(f"🎯 模型準確率: {accuracy * 100:.2f}%\n")
     print("📝 分類詳細報告:")
