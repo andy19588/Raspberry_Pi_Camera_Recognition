@@ -39,6 +39,11 @@ def main():
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
     labels = ['Rock', 'Paper', 'Scissors']
+    
+    frame_count = 0
+    # 設定每隔幾張畫面才做一次辨識 (數字越大畫面越順，但辨識更新越慢)
+    process_every_n_frames = 5 
+    pred_label = "Waiting..."
 
     while True:
         ret, frame = cap.read()
@@ -57,30 +62,33 @@ def main():
         roi = frame[y1:y2, x1:x2]
 
         if roi.size > 0:
-            try:
-                if model_type == 'svm':
-                    gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-                    resized = cv2.resize(gray, (64, 64))
-                    features = (resized.flatten() / 255.0).reshape(1, -1)
-                    pred_idx = model.predict(features)[0]
-                    pred_label = labels[pred_idx]
-                else:
-                    rgb = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
-                    resized = cv2.resize(rgb, (224, 224))
-                    input_arr = np.expand_dims(resized, axis=0).astype(np.float32)
-                    
-                    if model_type == 'mobilenet':
-                        input_arr = tf.keras.applications.mobilenet_v2.preprocess_input(input_arr)
+            frame_count += 1
+            # 只有在符合設定的幀數時才進行辨識，藉此提高攝影機顯示的 FPS
+            if frame_count % process_every_n_frames == 0:
+                try:
+                    if model_type == 'svm':
+                        gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+                        resized = cv2.resize(gray, (64, 64))
+                        features = (resized.flatten() / 255.0).reshape(1, -1)
+                        pred_idx = model.predict(features)[0]
+                        pred_label = labels[pred_idx]
                     else:
-                        input_arr = tf.keras.applications.efficientnet.preprocess_input(input_arr)
+                        rgb = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
+                        resized = cv2.resize(rgb, (224, 224))
+                        input_arr = np.expand_dims(resized, axis=0).astype(np.float32)
                         
-                    preds = model.predict(input_arr, verbose=0)
-                    pred_idx = np.argmax(preds[0])
-                    pred_label = labels[pred_idx]
-                    
-                cv2.putText(frame, f"Predict: {pred_label}", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            except Exception as e:
-                pass
+                        if model_type == 'mobilenet':
+                            input_arr = tf.keras.applications.mobilenet_v2.preprocess_input(input_arr)
+                        else:
+                            input_arr = tf.keras.applications.efficientnet.preprocess_input(input_arr)
+                            
+                        preds = model.predict(input_arr, verbose=0)
+                        pred_idx = np.argmax(preds[0])
+                        pred_label = labels[pred_idx]
+                except Exception as e:
+                    pass
+
+            cv2.putText(frame, f"Predict: {pred_label}", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         cv2.imshow("Raspberry Pi - Gesture Recognition", frame)
 
