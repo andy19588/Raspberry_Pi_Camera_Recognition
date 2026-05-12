@@ -30,18 +30,30 @@ python train_efficientnet.py
 ```
 訓練好的模型會自動儲存至 `demo/` 資料夾中。
 
-## 模型測試
+## 模型測試 (test.py)
 
-可以使用 `demo/test.py` 來測試模型在 `dataset/test` 測試集上的表現 (包含 Accuracy, Precision, Recall, F1-score 等)：
+可以使用 `demo/test.py` 來測試已經訓練好的模型在 `dataset/test` 測試集上的表現。
+這個程式會自動輸出模型的各項評估指標，包含 Accuracy, Precision, Recall, 與 F1-score：
 ```bash
 cd demo
 # 測試 SVM
 python test.py --model svm
+
 # 測試 MobileNet
 python test.py --model mobilenet
+
 # 測試 EfficientNet
 python test.py --model efficientnet
 ```
+
+## 基礎攝影機測試 (carema.py)
+
+在進行手勢辨識前，如果你想要先確認樹莓派的鏡頭是否有接好、畫面是否能正常顯示，可以單純執行這個測試程式：
+```bash
+cd demo
+python carema.py
+```
+執行後畫面會跳出攝影機的即時影像，按 `q` 鍵即可關閉。
 
 ## 樹莓派即時辨識
 
