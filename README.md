@@ -46,6 +46,9 @@ python test.py --model mobilenet
 python test.py --model efficientnet
 ```
 
+**執行結果範例：**
+![test result](result/test.png)
+
 ## 基礎攝影機測試 (carema.py)
 
 在進行手勢辨識前，如果你想要先確認樹莓派的鏡頭是否有接好、畫面是否能正常顯示，可以單純執行這個測試程式：
@@ -73,6 +76,9 @@ python pi_camera_recognition.py --model mobilenet
 python pi_camera_recognition.py --model efficientnet
 ```
 執行後畫面中會出現一個綠色方框，請將手勢置於框內即可看到即時的辨識結果。按 `q` 鍵可離開程式。
+
+**執行結果範例：**
+![camera result](result/camera.png)
 
 ---
 
