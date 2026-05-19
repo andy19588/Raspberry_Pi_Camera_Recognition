@@ -73,8 +73,8 @@ def main():
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-    labels = ['石頭', '布', '剪刀']
-    pred_label = "等待中..."
+    labels = ['Rock', 'Paper', 'Scissors']
+    pred_label = "Waiting..."
     
     # 用於多執行緒共享的變數
     current_roi = None
@@ -105,7 +105,7 @@ def main():
                                 pred_idx = int(np.argmax(probs))
                                 pred_label = labels[pred_idx]
                             else:
-                                pred_label = "其他手勢"
+                                pred_label = "Other"
                         else:
                             # 若 SVM 沒開啟 probability=True，只能直接給結果
                             pred_idx = int(model.predict(features)[0])
@@ -126,7 +126,7 @@ def main():
                             pred_idx = int(np.argmax(preds[0]))
                             pred_label = f"{labels[pred_idx]} ({max_prob*100:.0f}%)"
                         else:
-                            pred_label = "其他手勢"
+                            pred_label = "Other"
                 except Exception as e:
                     pass
 
@@ -213,10 +213,10 @@ def main():
                     new_frame_event.set() # 喚醒推論執行緒
                 break # 確保只處理第一隻手
         else:
-            pred_label = "其他"
+            pred_label = "Other"
 
-        # 使用 PIL 畫中文
-        frame = put_chinese_text(frame, f"預測結果: {pred_label}", (10, 10), (0, 0, 255), 40)
+        # 使用 cv2.putText 畫英文
+        cv2.putText(frame, f"Result: {pred_label}", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 3, cv2.LINE_AA)
         
         cv2.imshow("Raspberry Pi - Gesture Recognition", frame)
 
