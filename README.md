@@ -87,3 +87,26 @@ python pi_camera_recognition.py --model efficientnet
 2. 選擇 Raspberry Pi 4 64-bit 系統並寫入 SD 卡。
 3. 設定 WiFi、Hostname、SSH 以及對應時區。
 4. 將 SD 卡插入樹莓派後開機，並透過 SSH 連入安裝上述需求套件。
+
+---
+
+## 模型架構修改與比較 (期末報告 Part 3 要求)
+
+本專案實作內容已涵蓋報告 Part 3 的相關要求：
+
+### 1. 自行找兩個模型架構修改 (20%)
+專案中除了基礎的 SVM 模型外，額外實作並引入了兩種不同的深度學習網路架構：
+* **MobileNetV2** (`train_mobilenet.py`)
+* **EfficientNetB0** (`train_efficientnet.py`)
+> **評估指標呈現**：執行 `demo/test.py` 時，程式會自動計算並輸出這三個模型的完整指標，包含 **Accuracy (準確率)**、**Precision (精確率)**、**Recall (召回率)** 以及 **F1-score**。
+
+### 2. 解釋更換模型原因及比較差異 (15%)
+我們將原本的辨識方式擴展至 MobileNetV2 與 EfficientNetB0，原因與差異如下：
+
+* **更換模型原因：**
+  * 原先的基礎模型 (如 SVM) 通常需要依賴手動特徵提取或降維，面對背景複雜或光影變化較大的實際攝影機畫面時，辨識能力容易受限。
+  * 為了提高在樹莓派上的實用性與魯棒性 (Robustness)，我們導入了能夠自動萃取深層特徵的卷積神經網路 (CNN)。
+* **模型差異比較：**
+  * **MobileNetV2**：主打輕量化與高速運算，使用了深度可分離卷積 (Depthwise Separable Convolution)。其最大優勢在於**參數量少、推論速度快**，非常適合算力受限的邊緣裝置（如樹莓派），能在確保基本準確率的情況下提供流暢的高 FPS 體驗。
+  * **EfficientNetB0**：採用了複合縮放 (Compound Scaling) 技術，在深度、寬度及解析度間取得最佳平衡。相較於 MobileNetV2，它**保留了更多的特徵細節，準確率與各項指標表現通常更優秀**，但也相對需要稍微多一點的運算資源。
+  * **總結**：如果在樹莓派上追求最即時的無延遲辨識，MobileNet 是首選；如果對手勢辨識的精準度有較高要求，則可以選擇切換為 EfficientNet 進行推論。
