@@ -90,17 +90,15 @@ python pi_camera_recognition.py --model efficientnet
 
 ---
 
-## 模型架構修改與比較 (期末報告 Part 3 要求)
+## 模型架構修改與比較
 
-本專案實作內容已涵蓋報告 Part 3 的相關要求：
-
-### 1. 自行找兩個模型架構修改 (20%)
+### 1. 自行找兩個模型架構修改
 專案中除了基礎的 SVM 模型外，額外實作並引入了兩種不同的深度學習網路架構：
 * **MobileNetV2** (`train_mobilenet.py`)
 * **EfficientNetB0** (`train_efficientnet.py`)
 > **評估指標呈現**：執行 `demo/test.py` 時，程式會自動計算並輸出這三個模型的完整指標，包含 **Accuracy (準確率)**、**Precision (精確率)**、**Recall (召回率)** 以及 **F1-score**。
 
-### 2. 解釋更換模型原因及比較差異 (15%)
+### 2. 解釋更換模型原因及比較差異
 我們將原本的辨識方式擴展至 MobileNetV2 與 EfficientNetB0，原因與差異如下：
 
 * **更換模型原因：**
@@ -112,7 +110,7 @@ python pi_camera_recognition.py --model efficientnet
   * **總結**：如果在樹莓派上追求最即時的無延遲辨識，MobileNet 是首選；如果對手勢辨識的精準度有較高要求，則可以選擇切換為 EfficientNet 進行推論。
 
 ### 3. 模型結果展示
-以下為新增模型的實際測試結果與指標（已從原始 HEIC 檔案轉換）：
+以下為新增模型的實際測試結果與指標：
 
 **MobileNet 測試結果：**
 ![MobileNet 結果](result/mobilenet.jpg)
