@@ -110,3 +110,12 @@ python pi_camera_recognition.py --model efficientnet
   * **MobileNetV2**：主打輕量化與高速運算，使用了深度可分離卷積 (Depthwise Separable Convolution)。其最大優勢在於**參數量少、推論速度快**，非常適合算力受限的邊緣裝置（如樹莓派），能在確保基本準確率的情況下提供流暢的高 FPS 體驗。
   * **EfficientNetB0**：採用了複合縮放 (Compound Scaling) 技術，在深度、寬度及解析度間取得最佳平衡。相較於 MobileNetV2，它**保留了更多的特徵細節，準確率與各項指標表現通常更優秀**，但也相對需要稍微多一點的運算資源。
   * **總結**：如果在樹莓派上追求最即時的無延遲辨識，MobileNet 是首選；如果對手勢辨識的精準度有較高要求，則可以選擇切換為 EfficientNet 進行推論。
+
+### 3. 模型結果展示
+以下為新增模型的實際測試結果與指標（已從原始 HEIC 檔案轉換）：
+
+**MobileNet 測試結果：**
+![MobileNet 結果](result/mobilenet.jpg)
+
+**EfficientNet 測試結果：**
+![EfficientNet 結果](result/efficient.jpg)
